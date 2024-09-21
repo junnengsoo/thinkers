@@ -30,6 +30,8 @@ contourpy @ file:///Users/runner/miniforge3/conda-bld/contourpy_1712429958595/wo
 cryptography @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_19nb9xvs53/croot/cryptography_1710350362185/work
 cycler @ file:///home/conda/feedstock_root/build_artifacts/cycler_1696677705766/work
 cymem @ file:///Users/runner/miniforge3/conda-bld/cymem_1695443566281/work
+datasets==3.0.0
+dill==0.3.8
 distro @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/distro_1701803554172/work
 docker-pycreds==0.4.0
 emoji==2.13.0
@@ -48,6 +50,7 @@ graphql-core==3.2.4
 h11==0.14.0
 httpcore==1.0.5
 httpx==0.27.2
+huggingface-hub==0.25.0
 idna @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/idna_1699237644810/work
 importlib_metadata @ file:///home/conda/feedstock_root/build_artifacts/importlib-metadata_1710971335535/work
 janus==1.0.0
@@ -66,6 +69,7 @@ mdurl @ file:///home/conda/feedstock_root/build_artifacts/mdurl_1704317613764/wo
 menuinst @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_26a7xsau78/croot/menuinst_1706732941263/work
 mpmath @ file:///home/conda/feedstock_root/build_artifacts/mpmath_1678228039184/work
 multidict==6.1.0
+multiprocess==0.70.16
 munkres==1.1.4
 murmurhash @ file:///Users/runner/miniforge3/conda-bld/murmurhash_1695449858485/work
 networkx @ file:///home/conda/feedstock_root/build_artifacts/networkx_1712540363324/work
@@ -93,7 +97,7 @@ python-json-logger==2.0.7
 pytz @ file:///home/conda/feedstock_root/build_artifacts/pytz_1706886791323/work
 PyYAML @ file:///Users/runner/miniforge3/conda-bld/pyyaml_1695373531920/work
 regex==2024.9.11
-requests @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_b3tnputioh/croot/requests_1707355573919/work
+requests==2.32.3
 requests-toolbelt==1.0.0
 rich @ file:///home/conda/feedstock_root/build_artifacts/rich-split_1709150387247/work/dist
 ruamel.yaml @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/ruamel.yaml_1699241608430/work
@@ -118,7 +122,7 @@ threadpoolctl @ file:///home/conda/feedstock_root/build_artifacts/threadpoolctl_
 tiktoken==0.7.0
 torch @ file:///Users/runner/miniforge3/conda-bld/libtorch_1715184454275/work/torch-2.1.2.post4-cp312-cp312-macosx_11_0_arm64.whl#sha256=03635be045c369bf21940b28dcf0a6e98d4d79f01a40dab2aabeda0a416fa99f
 torchvision @ file:///Users/runner/miniforge3/conda-bld/torchvision_1708903110299/work
-tqdm @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/tqdm_1701805884490/work
+tqdm==4.66.5
 truststore @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/truststore_1701805928787/work
 typer @ file:///home/conda/feedstock_root/build_artifacts/typer_1711217621866/work
 typing_extensions @ file:///home/conda/feedstock_root/build_artifacts/typing_extensions_1712329955671/work
@@ -131,6 +135,7 @@ weasel @ file:///home/conda/feedstock_root/build_artifacts/weasel_1699295455892/
 weave==0.51.8
 Werkzeug==3.0.4
 wheel==0.41.2
+xxhash==3.5.0
 yarl==1.11.1
 zipp @ file:///home/conda/feedstock_root/build_artifacts/zipp_1695255097490/work
 zstandard @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/zstandard_1699238791645/work
