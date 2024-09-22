@@ -4,18 +4,19 @@ from openai import OpenAI
 import weave
 from dotenv import load_dotenv
 from typing import Dict
-
+from pydantic import BaseModel
 
 load_dotenv()
+
 
 weave.init('together-weave')
 
 os.environ['OPENROUTER_API_KEY'] = os.getenv('OPENROUTER_API_KEY')
 
-client = OpenAI(
-    api_key=os.environ["OPENROUTER_API_KEY"],
-    base_url="https://openrouter.ai/api/v1",
-)
+# Define your desired output structure
+class EvaluationOutput(BaseModel):
+    winner: str  # r1 or r2
+    reasoning: str
 
 SYSTEM_PROMPT = """
 
@@ -52,7 +53,7 @@ def main_judge(
     Factors to evaluate include logical reasoning, efficiency, maintainability, and relevance to the current context. 
     Select the approach that best addresses the task at hand and provide clear reasoning for your choice.
     
-    The output should be in json format with the following structure:
+    The output should only be in the following structure:
     {
         "winner": "way_1" or "way_2",
         "reasoning": "Reasoning for selecting way_1 or way_2."
@@ -69,10 +70,14 @@ def main_judge(
     Way 2 Subtask: {way_2_subtask}
     Way 2 Thought Process: {way_2_task_thought_process}
     """
+    
+    # Patch the OpenAI client
+    client = instructor.from_openai(OpenAI(api_key=os.environ["OPENROUTER_API_KEY"], base_url="https://openrouter.ai/api/v1"))
 
     try:
-        chat_completion = client.chat.completions.create(
-            model="openai/gpt-3.5-turbo",
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            response_model=EvaluationOutput,
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": reasoning_text},
@@ -80,8 +85,7 @@ def main_judge(
             temperature=0.7,
             max_tokens=1024,
         )
-        response = chat_completion.choices[0].message.content
-        # print("Model response 2:", response)
+        # print(response)
         return response
         
     except Exception as e:
