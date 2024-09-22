@@ -28,8 +28,8 @@ class MathNode:
 class Reasoning(BaseModel):
     way1: str
     thought_process1: str
-    way2: Optional[str] = None
-    thought_process2: Optional[str] = None
+    way2: Optional[str] = ""
+    thought_process2: Optional[str] = ""
 
 
 class Solution(BaseModel):
@@ -306,6 +306,7 @@ class MathTree:
 
                 # Collect the solution path leading up to the two steps (this path will be the same for both steps)
                 path_up_to_steps = self.collect_solution_path(node, for_judge=True)
+                print(f"Path up to steps: {path_up_to_steps}")
 
                 # Collect subtask generation and thought process for each step
                 step1_details = {
