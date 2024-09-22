@@ -2,15 +2,19 @@ import weave
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
-import json
+import instructor
+from pydantic import BaseModel
+
+# Define your desired output structure
+class EvaluationOutput(BaseModel):
+    winner: str  # r1 or r2
+    reasoning: str
 
 load_dotenv()
 os.environ['OPENROUTER_API_KEY'] = os.getenv('OPENROUTER_API_KEY')
 
-client = OpenAI(
-    api_key=os.environ["OPENROUTER_API_KEY"],
-    base_url="https://openrouter.ai/api/v1",
-)
+# Patch the OpenAI client
+client = instructor.from_openai(OpenAI(api_key=os.environ["OPENROUTER_API_KEY"], base_url="https://openrouter.ai/api/v1"))
 
 @weave.op()
 def evaluate_pairwise(task: str, ground_truth: str, solutions: list) -> dict:
@@ -21,10 +25,10 @@ def evaluate_pairwise(task: str, ground_truth: str, solutions: list) -> dict:
         for j in range(i + 1, len(solutions)):
             reasoning_1, solution_1 = solutions[i]
             reasoning_2, solution_2 = solutions[j]
-            print(solutions)
             
             response = client.chat.completions.create(
                 model="gpt-4o",
+                response_model=EvaluationOutput,
                 messages=[
                     {
                         "role": "system",
@@ -45,17 +49,15 @@ def evaluate_pairwise(task: str, ground_truth: str, solutions: list) -> dict:
                         )
                     }
                 ],
-                response_format={"type": "json_object"}
             )
-            comparison_result = response.choices[0].message.content
             
-            # Parse the JSON string into a dictionary
-            evaluations.append(json.loads(comparison_result))  # Parse here
-    
+            # Access structured data from the response
+            evaluations.append(response)
+
     # Aggregate results into a ranking
     ranking = {}
     for result in evaluations:
-        winner = result["winner"]
+        winner = result.winner
         if winner not in ranking:
             ranking[winner] = 0
         ranking[winner] += 1
@@ -67,7 +69,6 @@ def evaluate_pairwise(task: str, ground_truth: str, solutions: list) -> dict:
         "final_ranking": ranked_results
     }
 
-
 # Example usage
 def main():
     task = "A train travels 60 miles in 1 hour. How far will it travel in 2 hours?"
@@ -77,7 +78,7 @@ def main():
         ("In 2 hours, at 60 miles per hour, the distance traveled would be calculated as speed multiplied by time: 60 * 2 = 120 miles.", "120 miles")
     ]
     
-    results = evaluate_pairwise(task, solutions)    
+    results = evaluate_pairwise(task, "120 miles", solutions)    
     # Print pairwise evaluations
     print("Pairwise Evaluations:")
     for index, evaluation in enumerate(results["pairwise_evaluations"]):
@@ -88,13 +89,10 @@ def main():
     
     # Print the winner and evaluation reasoning
     for evaluation in results["pairwise_evaluations"]:
-        if evaluation["winner"] == "way_1":
-            winning_way = "Way 1"
-        else:
-            winning_way = "Way 2"
+        winning_way = "Way 1" if evaluation.winner == "way_1" else "Way 2"
         
         print(f"\nWinner: {winning_way}")
-        print(f"Evaluation Reasoning: {evaluation['reason']}")
+        print(f"Evaluation Reasoning: {evaluation.reasoning}")
 
 # Run the main function
 if __name__ == "__main__":
