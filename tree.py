@@ -1,7 +1,6 @@
 import random
 from typing import List, Optional
 import os
-import math
 from openai import OpenAI
 from dotenv import load_dotenv
 import instructor
@@ -20,8 +19,6 @@ class MathNode:
         self.solution_thought_process: Optional[str] = None  # Thought process for achieving the sub-answer
         self.parent = parent  # Reference to parent node
         self.children: List['MathNode'] = []  # List of child nodes
-        self.visits = 0  # Number of visits (used in MCTS)
-        self.value = 0  # Value for evaluation (used in MCTS)
         self.isLeaf = False  # Flag to indicate if this node has reached a final answer (leaf node)
         
         # Store the main task explicitly, passing it down from the parent node
@@ -155,7 +152,7 @@ class OpenAIModel:
             }
 
 
-class MathMCST:
+class MathTree:
     MAX_DEPTH = 1
 
     def __init__(self, initial_task: str, model: OpenAIModel):

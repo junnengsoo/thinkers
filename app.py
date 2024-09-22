@@ -1,7 +1,6 @@
 from datasets import load_dataset
-from mcts import OpenAIModel, MathMCST
+from tree import OpenAIModel, MathTree
 import weave
-import json
 
 weave.init('together-weave')
 
@@ -17,7 +16,7 @@ def load_math_dataset(num_samples: int = 5):
     for i in range(num_samples):
         questions.append(ds['train'][i]['problem'])
 
-    return questions
+    return questions 
 
 # Main app function
 @weave.op()
@@ -32,7 +31,7 @@ def main():
     for i, question in enumerate(math_questions):
         print(f"\nProcessing question {i+1}: {question}")
         # Create an instance of the MCTS solver with the question
-        mcst = MathMCST(initial_task=question, model=model)
+        mcst = MathTree(initial_task=question, model=model)
 
         # Solve the task using the MCTS and LLM judging mechanism
         dpo_results = mcst.solve_task()
