@@ -4,6 +4,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 import instructor
 from pydantic import BaseModel
+from compare import compare_approaches
 
 # Define your desired output structure
 class EvaluationOutput(BaseModel):

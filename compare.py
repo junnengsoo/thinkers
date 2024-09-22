@@ -18,13 +18,7 @@ class EvaluationOutput(BaseModel):
     winner: str  # r1 or r2
     reasoning: str
 
-SYSTEM_PROMPT = """
-
-Evaluate the two approaches based on logical reasoning and computational efficiency.
-
-"""
-
-def main_judge(
+def real_llm_judge(
     path_up_till_current_step: str,
     way_1_subtask: str,
     way_1_task_thought_process: str,
@@ -93,12 +87,12 @@ def main_judge(
         return {"error": str(e)}
 
 # Example Test Case
-result = main_judge(
-    path_up_till_current_step="Solved equations using substitution but ran into complex fractions.",
-    way_1_subtask="Simplify the fractions first before solving for variables.",
-    way_1_task_thought_process="This method eliminates the fractions early on, making later steps easier, but requires extra manipulation at the start.",
-    way_2_subtask="Solve for variables directly without simplifying the fractions.",
-    way_2_task_thought_process="This method skips the fraction simplification, going straight to variable solutions, but makes the final steps more complex."
-)
+# result = compare_approaches(
+#     path_up_till_current_step="Solved equations using substitution but ran into complex fractions.",
+#     way_1_subtask="Simplify the fractions first before solving for variables.",
+#     way_1_task_thought_process="This method eliminates the fractions early on, making later steps easier, but requires extra manipulation at the start.",
+#     way_2_subtask="Solve for variables directly without simplifying the fractions.",
+#     way_2_task_thought_process="This method skips the fraction simplification, going straight to variable solutions, but makes the final steps more complex."
+# )
 
-print(result)
+# print(result)

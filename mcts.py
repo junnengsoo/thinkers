@@ -8,6 +8,7 @@ import instructor
 from pydantic import BaseModel
 from collections import deque
 import weave
+from compare import real_llm_judge
 
 
 # Updated MathNode Class
@@ -320,7 +321,15 @@ class MathMCST:
                 path_up_till_current_step = " -> ".join([step['task'] for step in path_up_to_steps])
 
                 # Run the LLM judge to determine the winner between the two steps
-                judge_decision = self.run_llm_judge(
+                # judge_decision = self.run_llm_judge(
+                #     path_up_till_current_step=path_up_till_current_step,
+                #     way_1_subtask=step1.task,
+                #     way_1_task_thought_process=step1.task_thought_process,
+                #     way_2_subtask=step2.task,
+                #     way_2_task_thought_process=step2.task_thought_process
+                # )
+                
+                judge_decision = real_llm_judge(
                     path_up_till_current_step=path_up_till_current_step,
                     way_1_subtask=step1.task,
                     way_1_task_thought_process=step1.task_thought_process,
@@ -358,7 +367,7 @@ class MathMCST:
             current = current.parent
         return tasks[::-1], solutions[::-1]
     
-
+    
     def run_llm_judge(self, path_up_till_current_step: str, way_1_subtask: str, way_1_task_thought_process: str, way_2_subtask: str, way_2_task_thought_process: str) -> dict:
         """
         A dummy LLM judge function that takes in two alternative steps and their thought processes,
