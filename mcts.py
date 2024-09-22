@@ -68,7 +68,7 @@ class OpenAIModel:
             f"considering the main task: '{maintask}', and the previous tasks and solutions: {context}, "
             f"generate {num_steps} distinct alternative ways to continue solving the main task based on the current step. "
             f"Each approach should explain why this particular strategy or next step is helpful in relation to the overall goal of solving the main task. "
-            f"Provide clear reasoning (thought_process) for each step."
+            f"Provide clear reasoning (thought_process) for each step. If you are unable to think of a distinct approach, return an empty string for both the way and thought process."
             f"\n\n"
             f"Ensure that each approach follows a different strategy from the others, be creative."
             f"There must be **{num_steps} distinct alternative steps generated**, else it will be invalid."
@@ -76,11 +76,13 @@ class OpenAIModel:
             f"Return the response in the following format:\n"
             f"{{'way1': '...', 'thought_process1': '...'}}\n"
             f"{{'way2': '...', 'thought_process2': '...'}}"
+            f"\nReminder: If an alternative really cannot be generated, return an empty string for the 'way2' and 'thought_process2'."
         )
+
 
         # Request response from the model
         response = self.client.chat.completions.create(
-            model="openai/gpt-3.5-turbo",
+            model="openai/gpt-4o",
             response_model=Reasoning,
             messages=[
                 {"role": "system", "content": "You are a helpful assistant that generates distinct alternative steps for solving math problems."},
@@ -319,15 +321,6 @@ class MathMCST:
 
                 # Prepare inputs for LLM judge
                 path_up_till_current_step = " -> ".join([step['task'] for step in path_up_to_steps])
-
-                # Run the LLM judge to determine the winner between the two steps
-                # judge_decision = self.run_llm_judge(
-                #     path_up_till_current_step=path_up_till_current_step,
-                #     way_1_subtask=step1.task,
-                #     way_1_task_thought_process=step1.task_thought_process,
-                #     way_2_subtask=step2.task,
-                #     way_2_task_thought_process=step2.task_thought_process
-                # )
                 
                 judge_decision = real_llm_judge(
                     path_up_till_current_step=path_up_till_current_step,
@@ -343,7 +336,7 @@ class MathMCST:
                     'step1': step1_details,
                     'step2': step2_details,
                     'llm_judge_winner': judge_decision['winner'],
-                    'llm_judge_thought_process': judge_decision['thought_process'],
+                    'llm_judge_thought_process': judge_decision['reasoning'],
                 }
 
                 # Append the DPO result for this pair of steps
@@ -399,11 +392,3 @@ class MathMCST:
             'winner': winner,
             'thought_process': judge_thought_process
         }
-
-
-
-# Example usage
-model = OpenAIModel()
-mcst = MathMCST("A rectangular band formation is a formation with $m$ band members in each of $r$ rows, where $m$ and $r$ are integers. A particular band has less than 100 band members. The director arranges them in a rectangular formation and finds that he has two members left over. If he increases the number of members in each row by 1 and reduces the number of rows by 2, there are exactly enough places in the new formation for each band member. What is the largest number of members the band could have?", model)
-solution_paths = mcst.solve_task()
-print("Solution paths:", solution_paths)

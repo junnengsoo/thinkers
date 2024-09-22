@@ -1,58 +1,46 @@
-import os
-from openai import OpenAI
+from datasets import load_dataset
+from mcts import OpenAIModel, MathMCST
 import weave
-from dotenv import load_dotenv
-
-load_dotenv()
+import json
 
 weave.init('together-weave')
 
-os.environ['OPENROUTER_API_KEY'] = os.getenv('OPENROUTER_API_KEY')
+# Dataset Loading Function
+def load_math_dataset(num_samples: int = 5):
+    """
+    Load the MATH dataset and extract the first `num_samples` questions.
+    """
+    print(f"Loading MATH dataset with {num_samples} samples...")
+    ds = load_dataset("lighteval/MATH", "all")
+    
+    questions = []
+    for i in range(num_samples):
+        questions.append(ds['train'][i]['problem'])
 
-client = OpenAI(
-    api_key=os.environ["OPENROUTER_API_KEY"],
-    base_url="https://openrouter.ai/api/v1",
-)
+    return questions
 
-def generate_word_problem_and_solution():
-    system_content = "You are a math teacher creating word problems. Provide a word problem, its step-by-step solution, and the final answer."
-    user_content = "Create a word problem about travel or transportation."
+# Main app function
+@weave.op()
+def main():
+    # Load the dataset
+    math_questions = load_math_dataset(num_samples=5)
 
-    chat_completion = client.chat.completions.create(
-        model="openai/gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": system_content},
-            {"role": "user", "content": user_content},
-        ],
-        temperature=0.7,
-        max_tokens=1024,
-    )
-    response = chat_completion.choices[0].message.content
-    return response
+    # Initialize OpenAI Model (with Weave integration)
+    model = OpenAIModel()
 
-def parse_problem_and_solution(response):
-    sections = response.split("\n\n")
-    problem = sections[0].strip()
-    solution = sections[-1].strip()
-    reasoning = "\n".join(sections[1:-1]).strip()
-    return problem, reasoning, solution
+    # Process each question using MCTS and LLM judge
+    for i, question in enumerate(math_questions):
+        print(f"\nProcessing question {i+1}: {question}")
+        # Create an instance of the MCTS solver with the question
+        mcst = MathMCST(initial_task=question, model=model)
 
-# Generate word problem and solution
-# generated_content = generate_word_problem_and_solution()
-# print("Generated content:\n", generated_content)
+        # Solve the task using the MCTS and LLM judging mechanism
+        dpo_results = mcst.solve_task()
 
-# # Parse the generated content
-# problem, reasoning, solution = parse_problem_and_solution(generated_content)
+        # Output the results
+        print(f"\nDPO Results for question {i+1}:")
+        for result in dpo_results:
+            print(result)  # You can format this output as needed
 
-# # Evaluate the word problem solution using the function from llm_judge.py
-# evaluation = evaluate_word_problem_reasoning(problem, reasoning, solution)
-# print("\nEvaluation results:")
-# print(evaluation)
-
-# # Optional: Analyze the evaluation
-# evaluation_dict = eval(evaluation)  # Convert string to dictionary
-# overall_score = evaluation_dict['overall_score']
-# feedback = evaluation_dict['feedback']
-
-# print(f"\nOverall score: {overall_score}")
-# print(f"Feedback: {feedback}")
+if __name__ == "__main__":
+    main()

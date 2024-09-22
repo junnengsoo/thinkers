@@ -79,8 +79,12 @@ def real_llm_judge(
             temperature=0.7,
             max_tokens=1024,
         )
-        # print(response)
-        return response
+
+        output = {
+            "winner": response.winner,
+            "reasoning": response.reasoning
+        }
+        return output
         
     except Exception as e:
         print("An error occurred during the evaluation:", e)
