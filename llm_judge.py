@@ -13,7 +13,7 @@ client = OpenAI(
 )
 
 @weave.op()
-def evaluate_pairwise(task: str, solutions: list) -> dict:
+def evaluate_pairwise(task: str, ground_truth: str, solutions: list) -> dict:
     evaluations = []
     
     # Evaluate each pair of solutions
@@ -39,7 +39,7 @@ def evaluate_pairwise(task: str, solutions: list) -> dict:
                     {
                         "role": "user",
                         "content": (
-                            f"Word Problem: {task}\n\n"
+                            f"Word Problem: {task}\nCorrect Answer: {ground_truth}\n\n"
                             f"Way 1 - Reasoning: {reasoning_1}\nSolution: {solution_1}\n\n"
                             f"Way 2 - Reasoning: {reasoning_2}\nSolution: {solution_2}"
                         )
