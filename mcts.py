@@ -120,7 +120,7 @@ class OpenAIModel:
             f"Considering the previous tasks and solutions: {context}, "
             f"provide the sub-answer for this step with a thought process explaining the reasoning behind it. "
             f"Then, check if you have enough information to solve the main task: '{maintask}'. If yes, provide the final answer for the main task. "
-            f"If not, return the sub-answer, and indicate that more steps are needed."
+            f"If not, return the sub-answer."
         )
 
         # Request response from the model with a structured response model (Solution)
@@ -249,7 +249,7 @@ class MathMCST:
             current = current.parent
         return depth
 
-    def collect_solution_path(self, node: MathNode):
+    def collect_solution_path(self, node: MathNode, for_judge: bool = False) -> List[dict]:
         """Collect a valid solution path up to the current node."""
         path = []
         current_node = node
@@ -265,13 +265,87 @@ class MathMCST:
             current_node = current_node.parent
 
         path.reverse()  # Reverse to get the correct order from root to leaf
+
+        if for_judge:
+            # Simplified solution path for the judge: only include task and sub-answer
+            simplified_path = [{'task': step['task'], 'sub_answer': step['sub_answer']} for step in path]
+            return simplified_path
+
+        # Full path for general collection
         self.solution_paths.append(path)
+        return path
+
 
     @weave.op()
-    def solve_task(self) -> List[List[str]]:
-        """Solve the task by performing BFS-style MCTS search and returning all valid solution paths."""
-        self.bfs_search()  # Start the BFS search without iteration limits
-        return self.solution_paths
+    def solve_task(self) -> List[dict]:
+        """
+        Solve the task by performing BFS-style MCTS search, comparing step pairs, and returning detailed DPO results.
+
+        Output:
+        - List of JSON-like dicts with:
+        - path_up_to_steps
+        - step1 details (task, sub_answer, task_thought_process)
+        - step2 details (task, sub_answer, task_thought_process)
+        - llm_judge_winner
+        - llm_judge_thought_process
+        """
+        self.bfs_search()  # Start the BFS search
+
+        dpo_pairs = []  # To store DPO evaluation results
+
+        # Initialize the BFS queue with the root node
+        queue = deque([self.root])
+
+        while queue:
+            node = queue.popleft()  # Get the next node in the BFS queue
+
+            # If this node has at least two children, we can compare them
+            if len(node.children) >= 2:
+                step1, step2 = node.children[0], node.children[1]
+
+                # Collect the solution path leading up to the two steps (this path will be the same for both steps)
+                path_up_to_steps = self.collect_solution_path(node, for_judge=True)
+
+                # Collect subtask generation and thought process for each step
+                step1_details = {
+                    'task': step1.task,
+                    'thought_process': step1.task_thought_process,
+                }
+                step2_details = {
+                    'task': step2.task,
+                    'thought_process': step2.task_thought_process,
+                }
+
+                # Prepare inputs for LLM judge
+                path_up_till_current_step = " -> ".join([step['task'] for step in path_up_to_steps])
+
+                # Run the LLM judge to determine the winner between the two steps
+                judge_decision = self.run_llm_judge(
+                    path_up_till_current_step=path_up_till_current_step,
+                    way_1_subtask=step1.task,
+                    way_1_task_thought_process=step1.task_thought_process,
+                    way_2_subtask=step2.task,
+                    way_2_task_thought_process=step2.task_thought_process
+                )
+
+                # Collect everything into a single DPO result
+                dpo_result = {
+                    'path_up_to_steps': path_up_to_steps,  # Same path for both steps
+                    'step1': step1_details,
+                    'step2': step2_details,
+                    'llm_judge_winner': judge_decision['winner'],
+                    'llm_judge_thought_process': judge_decision['thought_process'],
+                }
+
+                # Append the DPO result for this pair of steps
+                dpo_pairs.append(dpo_result)
+
+            # Continue BFS by adding children to the queue
+            for child in node.children:
+                queue.append(child)
+
+        return dpo_pairs
+
 
     def get_context_from_node(self, node: MathNode):
         """Extract the full path of tasks and solutions up to this node."""
@@ -283,6 +357,40 @@ class MathMCST:
             solutions.append(current.task)
             current = current.parent
         return tasks[::-1], solutions[::-1]
+    
+
+    def run_llm_judge(self, path_up_till_current_step: str, way_1_subtask: str, way_1_task_thought_process: str, way_2_subtask: str, way_2_task_thought_process: str) -> dict:
+        """
+        A dummy LLM judge function that takes in two alternative steps and their thought processes,
+        and returns a JSON-like response with the winner and thought process.
+        
+        Input:
+        - path_up_till_current_step: str
+        - way_1_subtask: str
+        - way_1_task_thought_process: str
+        - way_2_subtask: str
+        - way_2_task_thought_process: str
+        
+        Output:
+        - JSON-like dict with 'winner' and 'thought_process'.
+        """
+        # Placeholder logic to simulate judging the two steps
+        # For demonstration, we'll randomly select "way_1" or "way_2" as the winner
+        winner = "way_1" if random.choice([True, False]) else "way_2"
+
+        # Dummy thought process for the LLM judge's decision
+        judge_thought_process = (
+            f"Based on the evaluation of both approaches, '{winner}' was chosen because "
+            f"it offers a more direct or efficient path to solving the task. "
+            f"The thought process of '{winner}' aligns better with achieving the main objective."
+        )
+
+        # Return the winner and the thought process as a dictionary
+        return {
+            'winner': winner,
+            'thought_process': judge_thought_process
+        }
+
 
 
 # Example usage
