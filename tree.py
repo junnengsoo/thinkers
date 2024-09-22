@@ -28,8 +28,8 @@ class MathNode:
 class Reasoning(BaseModel):
     way1: str
     thought_process1: str
-    way2: str
-    thought_process2: str
+    way2: Optional[str] = None
+    thought_process2: Optional[str] = None
 
 
 class Solution(BaseModel):
@@ -82,7 +82,7 @@ class OpenAIModel:
             model="openai/gpt-4o",
             response_model=Reasoning,
             messages=[
-                {"role": "system", "content": "You are a helpful assistant that generates distinct alternative steps for solving math problems."},
+                {"role": "system", "content": "You are a helpful assistant that generates distinct alternative steps for solving math problems. In this task, you must produce 2 alternative ways to continue solving the main task based on the current step."},
                 {"role": "user", "content": prompt}
             ]
         )
