@@ -63,17 +63,18 @@ class OpenAIModel:
             f"From the current step: '{task}' (solution: '{solution}'), "
             f"with the thought process: '{task_thought_process}', and the solution reasoning: '{solution_thought_process}', "
             f"considering the main task: '{maintask}', and the previous tasks and solutions: {context}, "
-            f"generate {num_steps} distinct alternative ways to continue solving the main task based on the current step. "
+            f"generate {num_steps} distinct alternative ways and thought processes to continue solving the main task based on the current step. "
+            f"\n\n"
+            f"These alternative ways must be different from the current step and each other."
             f"Each approach should explain why this particular strategy or next step is helpful in relation to the overall goal of solving the main task. "
-            f"Provide clear reasoning (thought_process) for each step. If you are unable to think of a distinct approach, return an empty string for both the way and thought process."
+            f"Provide clear reasoning (thought_process) for each step. "
             f"\n\n"
             f"Ensure that each approach follows a different strategy from the others, be creative."
-            f"There must be **{num_steps} distinct alternative steps generated**, else it will be invalid."
+            f"There must be **{num_steps} distinct alternative ways generated**, else the response will be invalid."
             f"\n\n"
             f"Return the response in the following format:\n"
             f"{{'way1': '...', 'thought_process1': '...'}}\n"
             f"{{'way2': '...', 'thought_process2': '...'}}"
-            f"\nReminder: If an alternative really cannot be generated, return an empty string for the 'way2' and 'thought_process2'."
         )
 
 
