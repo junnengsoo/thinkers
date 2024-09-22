@@ -2,7 +2,6 @@ import os
 from openai import OpenAI
 import weave
 from dotenv import load_dotenv
-from llm_judge import evaluate_word_problem_reasoning  # Import our custom function from llm_judge.py
 
 load_dotenv()
 
@@ -39,21 +38,21 @@ def parse_problem_and_solution(response):
     return problem, reasoning, solution
 
 # Generate word problem and solution
-generated_content = generate_word_problem_and_solution()
-print("Generated content:\n", generated_content)
+# generated_content = generate_word_problem_and_solution()
+# print("Generated content:\n", generated_content)
 
-# Parse the generated content
-problem, reasoning, solution = parse_problem_and_solution(generated_content)
+# # Parse the generated content
+# problem, reasoning, solution = parse_problem_and_solution(generated_content)
 
-# Evaluate the word problem solution using the function from llm_judge.py
-evaluation = evaluate_word_problem_reasoning(problem, reasoning, solution)
-print("\nEvaluation results:")
-print(evaluation)
+# # Evaluate the word problem solution using the function from llm_judge.py
+# evaluation = evaluate_word_problem_reasoning(problem, reasoning, solution)
+# print("\nEvaluation results:")
+# print(evaluation)
 
-# Optional: Analyze the evaluation
-evaluation_dict = eval(evaluation)  # Convert string to dictionary
-overall_score = evaluation_dict['overall_score']
-feedback = evaluation_dict['feedback']
+# # Optional: Analyze the evaluation
+# evaluation_dict = eval(evaluation)  # Convert string to dictionary
+# overall_score = evaluation_dict['overall_score']
+# feedback = evaluation_dict['feedback']
 
-print(f"\nOverall score: {overall_score}")
-print(f"Feedback: {feedback}")
+# print(f"\nOverall score: {overall_score}")
+# print(f"Feedback: {feedback}")
